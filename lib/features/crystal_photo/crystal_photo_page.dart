@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:universal_html/html.dart' as html;
@@ -20,6 +21,7 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
   Uint8List? _resultBytes;
 
   bool _generating = false;
+  bool _converting = false;
 
   String _selectedStyle = 'فاخرة';
 
@@ -30,31 +32,90 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
     'كاملة',
   ];
 
+  // ============================================================
+  // اختيار الصورة
+  // ============================================================
+
   Future<void> _pickImage() async {
     try {
       final XFile? file = await _picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 85,
+        imageQuality: 100,
         maxWidth: 1600,
         maxHeight: 1600,
       );
 
       if (file == null) return;
 
-      final bytes = await file.readAsBytes();
+      if (!mounted) return;
 
       setState(() {
-        _originalBytes = bytes;
+        _converting = true;
         _resultBytes = null;
       });
+
+      final bytes = await file.readAsBytes();
+
+      Uint8List finalBytes;
+
+      // ----------------------------------------------------------
+      // تحويل صور HEIC / HEIF الخاصة بالآيفون إلى PNG
+      // ----------------------------------------------------------
+
+      if (HeicConverter.isHeic(bytes)) {
+        _showMessage(
+          'نجهز صورة الآيفون لك... 💎',
+        );
+
+        finalBytes = await HeicConverter.convertToPNG(
+          heicData: bytes,
+          maxWidth: 1600,
+          maxHeight: 1600,
+        );
+      } else {
+        finalBytes = bytes;
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _originalBytes = finalBytes;
+        _resultBytes = null;
+        _converting = false;
+      });
+
+      _showMessage(
+        'تم رفع الصورة وتجهيزها بنجاح ✨',
+      );
     } catch (e) {
-      _showMessage('تعذر رفع الصورة');
+      if (!mounted) return;
+
+      setState(() {
+        _converting = false;
+      });
+
+      _showMessage(
+        'تعذر تجهيز الصورة، جربي صورة أخرى',
+      );
     }
   }
 
+  // ============================================================
+  // الفصفصة
+  // ============================================================
+
   Future<void> _generateCrystal() async {
     if (_originalBytes == null) {
-      _showMessage('ارفعي صورتك أولاً 💎');
+      _showMessage(
+        'ارفعي صورتك أولاً 💎',
+      );
+      return;
+    }
+
+    if (_converting) {
+      _showMessage(
+        'انتظري حتى تجهز الصورة ✨',
+      );
       return;
     }
 
@@ -71,13 +132,25 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
         ),
       );
 
+      // ----------------------------------------------------------
+      // إرسال مستوى الفصفصة
+      // ----------------------------------------------------------
+
       request.fields['style'] = _selectedStyle;
+
+      // ----------------------------------------------------------
+      // إرسال الصورة
+      // ----------------------------------------------------------
 
       request.files.add(
         http.MultipartFile.fromBytes(
           'image',
           _originalBytes!,
-          filename: 'user_photo.jpg',
+          filename: 'user_photo.png',
+          contentType: http.MediaType(
+            'image',
+            'png',
+          ),
         ),
       );
 
@@ -104,10 +177,14 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
       final data = jsonDecode(response.body);
 
       if (data['image'] == null) {
-        throw Exception('لم يتم استلام الصورة الناتجة');
+        throw Exception(
+          'لم يتم استلام الصورة الناتجة',
+        );
       }
 
-      final result = base64Decode(data['image']);
+      final result = base64Decode(
+        data['image'],
+      );
 
       if (!mounted) return;
 
@@ -115,12 +192,17 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
         _resultBytes = result;
       });
 
-      _showMessage('تمت الفصفصة بنجاح ✨');
+      _showMessage(
+        'تمت الفصفصة بنجاح ✨',
+      );
     } catch (e) {
       if (!mounted) return;
 
       _showMessage(
-        e.toString().replaceFirst('Exception: ', ''),
+        e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            ),
       );
     } finally {
       if (!mounted) return;
@@ -131,6 +213,10 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
     }
   }
 
+  // ============================================================
+  // تحميل الصورة الناتجة
+  // ============================================================
+
   void _downloadImage() {
     if (_resultBytes == null) return;
 
@@ -139,7 +225,9 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
       'image/png',
     );
 
-    final url = html.Url.createObjectUrlFromBlob(blob);
+    final url = html.Url.createObjectUrlFromBlob(
+      blob,
+    );
 
     final anchor = html.AnchorElement(
       href: url,
@@ -156,6 +244,10 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
     html.Url.revokeObjectUrl(url);
   }
 
+  // ============================================================
+  // الرسائل
+  // ============================================================
+
   void _showMessage(String message) {
     if (!mounted) return;
 
@@ -171,6 +263,10 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
       );
   }
 
+  // ============================================================
+  // الصفحة
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,7 +278,10 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // =================================================
                 // العنوان
+                // =================================================
+
                 const Text(
                   '💎 فصفص صورتك',
                   textAlign: TextAlign.center,
@@ -192,7 +291,9 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(
+                  height: 8,
+                ),
 
                 const Text(
                   'حوّلي صورتك إلى إطلالة وطنية من الفصفصة ✨',
@@ -202,15 +303,55 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(
+                  height: 24,
+                ),
 
-                // الصورة الأصلية
+                // =================================================
+                // رفع الصورة / الصورة المرفوعة
+                // =================================================
+
                 if (_originalBytes == null) _uploadBox() else _uploadedImage(),
 
-                const SizedBox(height: 24),
+                // =================================================
+                // حالة تجهيز الصورة
+                // =================================================
 
-                // الاستايلات
+                if (_converting) ...[
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  const Center(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          'نجهز الصورة لك... ✨',
+                          textDirection: TextDirection.rtl,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // =================================================
+                // خيارات الفصفصة
+                // =================================================
+
                 if (_originalBytes != null) ...[
+                  const SizedBox(
+                    height: 24,
+                  ),
+
                   const Text(
                     'اختاري الفصفصة',
                     style: TextStyle(
@@ -219,38 +360,64 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(
+                    height: 12,
+                  ),
 
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _styles.map((style) {
-                      final selected = _selectedStyle == style;
+                    children: _styles.map(
+                      (style) {
+                        final bool selected = _selectedStyle == style;
 
-                      return ChoiceChip(
-                        label: Text(style),
-                        selected: selected,
-                        onSelected: (_) {
-                          setState(() {
-                            _selectedStyle = style;
-                          });
-                        },
-                      );
-                    }).toList(),
+                        return ChoiceChip(
+                          label: Text(style),
+                          selected: selected,
+                          onSelected: _converting
+                              ? null
+                              : (_) {
+                                  setState(
+                                    () {
+                                      _selectedStyle = style;
+
+                                      // إذا غيرت
+                                      // المستوى
+                                      // نخلي الناتج
+                                      // القديم يختفي
+                                      _resultBytes = null;
+                                    },
+                                  );
+                                },
+                        );
+                      },
+                    ).toList(),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(
+                    height: 24,
+                  ),
 
-                  // معاينة
+                  // =================================================
+                  // المعاينة
+                  // =================================================
+
                   _previewCard(),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(
+                    height: 20,
+                  ),
 
+                  // =================================================
                   // زر الفصفصة
+                  // =================================================
+
                   SizedBox(
                     height: 56,
                     child: ElevatedButton.icon(
-                      onPressed: _generating ? null : _generateCrystal,
+                      onPressed: (_generating || _converting)
+                          ? null
+                          : _generateCrystal,
                       icon: _generating
                           ? const SizedBox(
                               width: 20,
@@ -261,7 +428,9 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
                             )
                           : const Text(
                               '💎',
-                              style: TextStyle(fontSize: 20),
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
                             ),
                       label: Text(
                         _generating ? 'جاري الفصفصة...' : 'فصفص صورتي',
@@ -274,44 +443,15 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
                   ),
                 ],
 
-                // المخرجات
-                if (_resultBytes != null) ...[
-                  const SizedBox(height: 35),
-                  const Text(
-                    '✨ المخرجات',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.memory(
-                      _resultBytes!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 54,
-                    child: OutlinedButton.icon(
-                      onPressed: _downloadImage,
-                      icon: const Icon(
-                        Icons.download_rounded,
-                      ),
-                      label: const Text(
-                        'حفظ الصورة',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                // =================================================
+                // الصورة الناتجة
+                // =================================================
 
-                const SizedBox(height: 40),
+                if (_resultBytes != null) _resultSection(),
+
+                const SizedBox(
+                  height: 40,
+                ),
 
                 const Text(
                   'عزنا بطبعنا 🇸🇦',
@@ -329,17 +469,24 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
     );
   }
 
+  // ============================================================
+  // مربع رفع الصورة
+  // ============================================================
+
   Widget _uploadBox() {
     return InkWell(
       onTap: _pickImage,
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        height: 260,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          vertical: 60,
+          horizontal: 20,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             width: 2,
-            style: BorderStyle.solid,
           ),
         ),
         child: const Column(
@@ -347,9 +494,13 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
           children: [
             Text(
               '💎',
-              style: TextStyle(fontSize: 50),
+              style: TextStyle(
+                fontSize: 50,
+              ),
             ),
-            SizedBox(height: 12),
+            SizedBox(
+              height: 12,
+            ),
             Text(
               'ارفعي صورتك',
               style: TextStyle(
@@ -357,7 +508,9 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 6),
+            SizedBox(
+              height: 6,
+            ),
             Text(
               'اختاري صورة من جهازك',
             ),
@@ -367,26 +520,41 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
     );
   }
 
+  // ============================================================
+  // الصورة المرفوعة
+  // ============================================================
+
   Widget _uploadedImage() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              width: 1,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: Image.memory(
             _originalBytes!,
-            height: 330,
-            fit: BoxFit.cover,
+            width: double.infinity,
+            fit: BoxFit.contain,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(
+          height: 10,
+        ),
         Row(
           children: [
             const Icon(
               Icons.check_circle,
               size: 20,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(
+              width: 6,
+            ),
             const Expanded(
               child: Text(
                 'تم رفع الصورة بنجاح',
@@ -396,7 +564,7 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
               ),
             ),
             TextButton(
-              onPressed: _pickImage,
+              onPressed: _converting || _generating ? null : _pickImage,
               child: const Text('تغيير'),
             ),
           ],
@@ -405,23 +573,38 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
     );
   }
 
+  // ============================================================
+  // بطاقة المعاينة
+  // ============================================================
+
   Widget _previewCard() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         border: Border.all(),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
             'المعاينة',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+
+          const SizedBox(
+            height: 12,
+          ),
+
+          // ------------------------------------------------------
+          // الصورة بدون ارتفاع محدد
+          // ------------------------------------------------------
+
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Stack(
@@ -429,42 +612,123 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
               children: [
                 Image.memory(
                   _originalBytes!,
-                  height: 220,
                   width: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
+
+                // ------------------------------------------------
+                // شاشة التحميل فوق الصورة
+                // ------------------------------------------------
+
                 if (_generating)
-                  Container(
-                    height: 220,
-                    width: double.infinity,
-                    color: Colors.black54,
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 12),
-                        Text(
-                          'نجهز الفصفصة لك... ✨',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black54,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(
+                            height: 12,
                           ),
-                        ),
-                      ],
+                          Text(
+                            'نجهز الفصفصة لك... ✨',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
+
+          const SizedBox(
+            height: 10,
+          ),
+
           Text(
             'ستايل: $_selectedStyle',
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // ============================================================
+  // النتيجة النهائية
+  // ============================================================
+
+  Widget _resultSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(
+          height: 35,
+        ),
+
+        const Text(
+          '✨ النتيجة',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(
+          height: 14,
+        ),
+
+        // --------------------------------------------------------
+        // الصورة الناتجة بدون height
+        // --------------------------------------------------------
+
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Image.memory(
+            _resultBytes!,
+            width: double.infinity,
+            fit: BoxFit.contain,
+          ),
+        ),
+
+        const SizedBox(
+          height: 16,
+        ),
+
+        // --------------------------------------------------------
+        // حفظ الصورة
+        // --------------------------------------------------------
+
+        SizedBox(
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: _downloadImage,
+            icon: const Icon(
+              Icons.download_rounded,
+            ),
+            label: const Text(
+              'حفظ الصورة',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
