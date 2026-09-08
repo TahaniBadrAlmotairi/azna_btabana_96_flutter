@@ -128,7 +128,7 @@ class _CrystalPhotoPageState extends State<CrystalPhotoPage> {
       final request = http.MultipartRequest(
         'POST',
         Uri.parse(
-          'https://azna-btabana-96-flutter-btijl893a-noteam-9c23.vercel.app/api/crystal',
+          'https://azna-btabana-96-flutter-9y8oqkek1-noteam-9c23.vercel.app/api/crystal',
         ),
       );
 
