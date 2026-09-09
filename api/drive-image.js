@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // CORS
   res.setHeader(
     "Access-Control-Allow-Origin",
     "*"
@@ -33,7 +34,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // نحاول جلب الصورة مباشرة من Google
     const googleUrl =
       `https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}=w1200`;
 
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       );
 
       return res.status(502).json({
-        error: "Google Drive image could not be loaded",
+        error: "Google image could not be loaded",
         status: response.status,
       });
     }
@@ -55,21 +55,17 @@ export default async function handler(req, res) {
       response.headers.get("content-type") ||
       "image/png";
 
-    const buffer = Buffer.from(
-      await response.arrayBuffer()
-    );
+    const arrayBuffer =
+      await response.arrayBuffer();
 
-    res.setHeader(
-      "Content-Type",
-      contentType
-    );
+    const base64 =
+      Buffer.from(arrayBuffer).toString("base64");
 
-    res.setHeader(
-      "Cache-Control",
-      "public, max-age=86400"
-    );
-
-    return res.status(200).send(buffer);
+    return res.status(200).json({
+      success: true,
+      mimeType: contentType,
+      image: base64,
+    });
 
   } catch (error) {
     console.error(

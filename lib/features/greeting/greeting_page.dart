@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
 
 import '../../app/theme/app_theme.dart';
@@ -24,12 +26,15 @@ class _GreetingPageState extends State<GreetingPage> {
   int _selectedIndex = 0;
   bool _saving = false;
 
-  // ============================================================
-  // رابط Vercel الخاص بجلب صور Google Drive
-  // ============================================================
-
   static const String _driveProxy =
-      'https://azna-btabana-96-flutter-9y8oqkek1-noteam-9c23.vercel.app/api/drive-image';
+      'https://azna-btabana-96-flutter-web.vercel.app/api/drive-image';
+
+  // تخزين الصور بعد تحميلها
+  final Map<int, Uint8List> _loadedImages = {};
+
+  // ============================================================
+  // INIT
+  // ============================================================
 
   @override
   void initState() {
@@ -37,8 +42,9 @@ class _GreetingPageState extends State<GreetingPage> {
 
     _pageController = PageController(
       viewportFraction: 0.62,
-      initialPage: 0,
     );
+
+    _loadAllDesigns();
   }
 
   @override
@@ -49,33 +55,111 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
+  // تحميل كل التصاميم
+  // ============================================================
+
+  Future<void> _loadAllDesigns() async {
+    await Future.wait([
+      _loadDesign(
+        0,
+        '1d6OAUbGM9my6kkJEfMi6tFEq2dnDjU6v',
+      ),
+      _loadDesign(
+        1,
+        '1WbzmyHfqjtJbBTmhaI16m9iticrIzy8x',
+      ),
+      _loadDesign(
+        2,
+        '12Z_HgBqUyPz7uRh8gePwVxBR4cNVRpW5',
+      ),
+      _loadDesign(
+        3,
+        '1Dww_pkqEVIY-ZgzYgmRTtAU19L1mfv4b',
+      ),
+      _loadDesign(
+        4,
+        '1u9ZhhSzq45sK7wK0bhm7kl6jHLAtl2e5',
+      ),
+      _loadDesign(
+        5,
+        '1KAsxcjOR5AsPJoeYzQj5gut1u-JanvEe',
+      ),
+      _loadDesign(
+        6,
+        '1uodOAWETVCMDjgSseeV5_w6YTbF9TvZt',
+      ),
+      _loadDesign(
+        7,
+        '1oRB7HdhoJzQOVhQSloUxaIi6M5yIqD60',
+      ),
+      _loadDesign(
+        8,
+        '17bQO3WXslSKNj0eUDySOzXjAKqSK7ICS',
+      ),
+    ]);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  // ============================================================
+  // تحميل تصميم واحد
+  // ============================================================
+
+  Future<void> _loadDesign(
+    int index,
+    String driveId,
+  ) async {
+    try {
+      final uri = Uri.parse(
+        '$_driveProxy?id=$driveId',
+      );
+
+      final response = await http.get(uri);
+
+      if (response.statusCode != 200) {
+        debugPrint(
+          'Design $index failed: ${response.statusCode}',
+        );
+        return;
+      }
+
+      final data = jsonDecode(response.body);
+
+      if (data['success'] != true) {
+        debugPrint(
+          'Design $index API error: ${response.body}',
+        );
+        return;
+      }
+
+      final base64Image = data['image'] as String?;
+
+      if (base64Image == null || base64Image.isEmpty) {
+        return;
+      }
+
+      final bytes = base64Decode(base64Image);
+
+      _loadedImages[index] = bytes;
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (error) {
+      debugPrint(
+        'Design $index error: $error',
+      );
+    }
+  }
+
+  // ============================================================
   // التصميم الأول
   // ============================================================
 
   Widget _designOne() {
-    return Image.network(
-      '$_driveProxy?id=1d6OAUbGM9my6kkJEfMi6tFEq2dnDjU6v',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(0);
   }
 
   // ============================================================
@@ -83,29 +167,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designTwo() {
-    return Image.network(
-      '$_driveProxy?id=1WbzmyHfqjtJbBTmhaI16m9iticrIzy8x',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(1);
   }
 
   // ============================================================
@@ -113,29 +175,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designThree() {
-    return Image.network(
-      '$_driveProxy?id=12Z_HgBqUyPz7uRh8gePwVxBR4cNVRpW5',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(2);
   }
 
   // ============================================================
@@ -143,29 +183,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designFour() {
-    return Image.network(
-      '$_driveProxy?id=1Dww_pkqEVIY-ZgzYgmRTtAU19L1mfv4b',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(3);
   }
 
   // ============================================================
@@ -173,29 +191,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designFive() {
-    return Image.network(
-      '$_driveProxy?id=1u9ZhhSzq45sK7wK0bhm7kl6jHLAtl2e5',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(4);
   }
 
   // ============================================================
@@ -203,29 +199,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designSix() {
-    return Image.network(
-      '$_driveProxy?id=1KAsxcjOR5AsPJoeYzQj5gut1u-JanvEe',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(5);
   }
 
   // ============================================================
@@ -233,29 +207,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designSeven() {
-    return Image.network(
-      '$_driveProxy?id=1uodOAWETVCMDjgSseeV5_w6YTbF9TvZt',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(6);
   }
 
   // ============================================================
@@ -263,29 +215,7 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designEight() {
-    return Image.network(
-      '$_driveProxy?id=1oRB7HdhoJzQOVhQSloUxaIi6M5yIqD60',
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imageError();
-      },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
+    return _imageFromMemory(7);
   }
 
   // ============================================================
@@ -293,82 +223,41 @@ class _GreetingPageState extends State<GreetingPage> {
   // ============================================================
 
   Widget _designNine() {
-    return Image.network(
-      '$_driveProxy?id=17bQO3WXslSKNj0eUDySOzXjAKqSK7ICS',
+    return _imageFromMemory(8);
+  }
+
+  // ============================================================
+  // عرض الصورة من الذاكرة
+  // ============================================================
+
+  Widget _imageFromMemory(int index) {
+    final bytes = _loadedImages[index];
+
+    if (bytes == null) {
+      return Container(
+        color: AppColors.deep2,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(
+          color: AppColors.gold,
+          strokeWidth: 2.5,
+        ),
+      );
+    }
+
+    return Image.memory(
+      bytes,
       fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
       width: double.infinity,
       height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
+      filterQuality: FilterQuality.high,
+      gaplessPlayback: true,
+      errorBuilder: (
+        context,
+        error,
+        stackTrace,
+      ) {
         return _imageError();
       },
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
-        if (loadingProgress == null) {
-          return child;
-        }
-
-        return _imageLoading(
-          loadingProgress,
-        );
-      },
-    );
-  }
-
-  // ============================================================
-  // حالة تحميل الصورة
-  // ============================================================
-
-  Widget _imageLoading(
-    ImageChunkEvent loadingProgress,
-  ) {
-    final value = loadingProgress.expectedTotalBytes != null
-        ? loadingProgress.cumulativeBytesLoaded /
-            loadingProgress.expectedTotalBytes!
-        : null;
-
-    return Container(
-      color: AppColors.deep2,
-      alignment: Alignment.center,
-      child: CircularProgressIndicator(
-        value: value,
-        color: AppColors.gold,
-        strokeWidth: 2.5,
-      ),
-    );
-  }
-
-  // ============================================================
-  // حالة الخطأ
-  // ============================================================
-
-  Widget _imageError() {
-    return Container(
-      color: AppColors.deep2,
-      alignment: Alignment.center,
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.broken_image_outlined,
-            color: AppColors.muted,
-            size: 42,
-          ),
-          SizedBox(height: 10),
-          Text(
-            'تعذر تحميل التصميم',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'SaudiWeb',
-              color: AppColors.muted,
-              fontSize: 13,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -411,6 +300,37 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
+  // حالة الخطأ
+  // ============================================================
+
+  Widget _imageError() {
+    return Container(
+      color: AppColors.deep2,
+      alignment: Alignment.center,
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.broken_image_outlined,
+            color: AppColors.muted,
+            size: 42,
+          ),
+          SizedBox(height: 10),
+          Text(
+            'تعذر تحميل التصميم',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'SaudiWeb',
+              color: AppColors.muted,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
   // الاسم
   // ============================================================
 
@@ -425,7 +345,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // كرت التصميم - Cover Flow
+  // COVER FLOW
   // ============================================================
 
   Widget _buildDesignCard({
@@ -433,15 +353,13 @@ class _GreetingPageState extends State<GreetingPage> {
     required double page,
   }) {
     final difference = page - index;
+
     final distance = difference.abs();
 
-    // التصميم الموجود في المنتصف يكون أكبر
     final scale = (1 - distance * 0.22).clamp(0.72, 1.0);
 
-    // ميلان التصاميم الجانبية
     final rotation = difference.clamp(-1.0, 1.0) * 0.10;
 
-    // شفافية بسيطة للتصاميم الجانبية
     final opacity = (1 - distance * 0.28).clamp(0.55, 1.0);
 
     final isSelected = index == _selectedIndex;
@@ -460,7 +378,9 @@ class _GreetingPageState extends State<GreetingPage> {
               width: 230,
               height: 405,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(
+                  24,
+                ),
                 border: Border.all(
                   color: isSelected ? AppColors.gold : Colors.transparent,
                   width: isSelected ? 2.5 : 0,
@@ -468,7 +388,9 @@ class _GreetingPageState extends State<GreetingPage> {
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: AppColors.gold.withOpacity(0.25),
+                          color: AppColors.gold.withOpacity(
+                            0.25,
+                          ),
                           blurRadius: 25,
                           spreadRadius: 2,
                         ),
@@ -476,7 +398,9 @@ class _GreetingPageState extends State<GreetingPage> {
                     : null,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(21),
+                borderRadius: BorderRadius.circular(
+                  21,
+                ),
                 child: _getDesign(index),
               ),
             ),
@@ -487,7 +411,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التقاط التهنئة كـ PNG
+  // التقاط الصورة
   // ============================================================
 
   Future<Uint8List?> _capture() async {
@@ -510,7 +434,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // حفظ التهنئة
+  // الحفظ
   // ============================================================
 
   Future<void> _save() async {
@@ -523,9 +447,10 @@ class _GreetingPageState extends State<GreetingPage> {
     });
 
     try {
-      // نعطي Flutter لحظة حتى يحدّث الاسم/التصميم
       await Future.delayed(
-        const Duration(milliseconds: 150),
+        const Duration(
+          milliseconds: 150,
+        ),
       );
 
       final bytes = await _capture();
@@ -542,7 +467,9 @@ class _GreetingPageState extends State<GreetingPage> {
         'image/png',
       );
 
-      final url = html.Url.createObjectUrlFromBlob(blob);
+      final url = html.Url.createObjectUrlFromBlob(
+        blob,
+      );
 
       final anchor = html.AnchorElement(
         href: url,
@@ -553,22 +480,22 @@ class _GreetingPageState extends State<GreetingPage> {
         )
         ..style.display = 'none';
 
-      html.document.body?.children.add(
-        anchor,
-      );
+      html.document.body?.children.add(anchor);
 
       anchor.click();
 
       anchor.remove();
 
-      html.Url.revokeObjectUrl(url);
+      html.Url.revokeObjectUrl(
+        url,
+      );
 
       _showMessage(
         'تم حفظ التهنئة بنجاح 🇸🇦',
       );
     } catch (error) {
       debugPrint(
-        'Save greeting error: $error',
+        'Save error: $error',
       );
 
       _showMessage(
@@ -584,10 +511,12 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // SnackBar
+  // الرسائل
   // ============================================================
 
-  void _showMessage(String message) {
+  void _showMessage(
+    String message,
+  ) {
     if (!mounted) {
       return;
     }
@@ -605,18 +534,20 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // الصفحة
+  // BUILD
   // ============================================================
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: AppColors.deep,
 
         // ========================================================
-        // AppBar
+        // APP BAR
         // ========================================================
 
         appBar: AppBar(
@@ -633,7 +564,7 @@ class _GreetingPageState extends State<GreetingPage> {
         ),
 
         // ========================================================
-        // Body
+        // BODY
         // ========================================================
 
         body: ListView(
@@ -657,7 +588,9 @@ class _GreetingPageState extends State<GreetingPage> {
               ),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(
+              height: 6,
+            ),
 
             const Text(
               'اسحب يمين ويسار واختر التصميم اللي يعجبك',
@@ -669,10 +602,12 @@ class _GreetingPageState extends State<GreetingPage> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(
+              height: 20,
+            ),
 
             // ====================================================
-            // Cover Flow
+            // COVER FLOW
             // ====================================================
 
             SizedBox(
@@ -725,7 +660,9 @@ class _GreetingPageState extends State<GreetingPage> {
                   color: AppColors.gold,
                   size: 18,
                 ),
-                const SizedBox(width: 7),
+                const SizedBox(
+                  width: 7,
+                ),
                 Text(
                   '${_selectedIndex + 1} من 9',
                   style: const TextStyle(
@@ -738,10 +675,12 @@ class _GreetingPageState extends State<GreetingPage> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(
+              height: 24,
+            ),
 
             // ====================================================
-            // خانة الاسم
+            // الاسم
             // ====================================================
 
             Padding(
@@ -776,11 +715,15 @@ class _GreetingPageState extends State<GreetingPage> {
                     color: AppColors.muted,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(
+                      18,
+                    ),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(
+                      18,
+                    ),
                     borderSide: const BorderSide(
                       color: AppColors.gold,
                       width: 1.2,
@@ -790,10 +733,12 @@ class _GreetingPageState extends State<GreetingPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(
+              height: 24,
+            ),
 
             // ====================================================
-            // معاينة التهنئة النهائية
+            // المعاينة النهائية
             // ====================================================
 
             Padding(
@@ -807,15 +752,12 @@ class _GreetingPageState extends State<GreetingPage> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // التصميم المختار
+                      // التصميم
                       _getDesign(
                         _selectedIndex,
                       ),
 
-                      // ==========================================
                       // الاسم
-                      // ==========================================
-
                       Align(
                         alignment: const Alignment(
                           0,
@@ -857,7 +799,9 @@ class _GreetingPageState extends State<GreetingPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(
+              height: 24,
+            ),
 
             // ====================================================
             // زر الحفظ
@@ -892,9 +836,13 @@ class _GreetingPageState extends State<GreetingPage> {
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.emerald,
                   foregroundColor: AppColors.white,
-                  minimumSize: const Size.fromHeight(56),
+                  minimumSize: const Size.fromHeight(
+                    56,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(
+                      18,
+                    ),
                   ),
                 ),
               ),
