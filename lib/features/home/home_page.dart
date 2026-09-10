@@ -147,7 +147,7 @@ class HomePage extends StatelessWidget {
                       // قبل ظهور الأزرار
                       // ======================================================
 
-                      const SizedBox(height: 120),
+                      const SizedBox(height: 305),
 
                       // ======================================================
                       // SERVICE 1
