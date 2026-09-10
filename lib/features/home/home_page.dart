@@ -36,6 +36,15 @@ class HomePage extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: AppColors.deep,
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'تعذر تحميل صورة Hero',
+                        style: TextStyle(
+                          fontFamily: 'SaudiWeb',
+                          color: AppColors.white,
+                          fontSize: 16,
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -58,10 +67,10 @@ class HomePage extends StatelessWidget {
                         1.0,
                       ],
                       colors: [
-                        Colors.black.withOpacity(.10),
                         Colors.black.withOpacity(.08),
-                        AppColors.deep.withOpacity(.35),
-                        AppColors.deep.withOpacity(.90),
+                        Colors.black.withOpacity(.05),
+                        AppColors.deep.withOpacity(.30),
+                        AppColors.deep.withOpacity(.88),
                       ],
                     ),
                   ),
@@ -83,36 +92,20 @@ class HomePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // ============================================================
-// الشعار الرسمي — بالمنتصف
-// ============================================================
-
-                      Center(
-                        child: Image.asset(
-                          'assets/identity/logo.png',
-                          height: 65,
-                          fit: BoxFit.contain,
-                          errorBuilder: (
-                            context,
-                            error,
-                            stackTrace,
-                          ) {
-                            return const SizedBox(
-                              height: 65,
-                            );
-                          },
-                        ),
-                      ),
+                      // ======================================================
+                      // المساحة العلوية
+                      // الشعار الموجود داخل Hero يظهر بدون إضافة شعار آخر
+                      // ======================================================
 
                       const SizedBox(height: 30),
 
-// ======================================================
-// MAIN IDENTITY
-// ======================================================
+                      // ======================================================
+                      // MAIN IDENTITY
+                      // ======================================================
 
                       const Text(
                         'وطنية كريستالية',
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'SaudiWeb',
                           color: Colors.white,
@@ -132,8 +125,8 @@ class HomePage extends StatelessWidget {
                       const SizedBox(height: 10),
 
                       const Text(
-                        'خلي اليوم الوطني ٩٦ يلمع بطبعك 💎',
-                        textAlign: TextAlign.right,
+                        'خلّ اليوم الوطني.. يلمع بطبعك 💎',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'SaudiWeb',
                           color: Colors.white,
@@ -149,12 +142,12 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
 
-// مساحة كبيرة تظهر الخلفية قبل الأزرار
-                      const SizedBox(height: 382),
+                      // ======================================================
+                      // مساحة كبيرة لإظهار صورة الـ Hero
+                      // قبل ظهور الأزرار
+                      // ======================================================
 
-// ======================================================
-// SERVICE 1
-// ======================================================
+                      const SizedBox(height: 120),
 
                       // ======================================================
                       // SERVICE 1
@@ -213,9 +206,9 @@ class HomePage extends StatelessWidget {
 
                       const SizedBox(height: 28),
 
-                      // =================================================
+                      // ======================================================
                       // FOOTER
-                      // =================================================
+                      // ======================================================
 
                       const Text(
                         'عزنا بطبعنا 🇸🇦',
@@ -224,8 +217,11 @@ class HomePage extends StatelessWidget {
                           fontFamily: 'SaudiWeb',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.white,
                         ),
                       ),
+
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
