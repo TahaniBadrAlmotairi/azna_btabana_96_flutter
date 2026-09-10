@@ -97,7 +97,7 @@ class HomePage extends StatelessWidget {
                       // الشعار الموجود داخل Hero يظهر بدون إضافة شعار آخر
                       // ======================================================
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 62),
 
                       // ======================================================
                       // MAIN IDENTITY
