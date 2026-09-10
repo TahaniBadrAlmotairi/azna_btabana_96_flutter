@@ -17,19 +17,48 @@ class GreetingPage extends StatefulWidget {
 }
 
 class _GreetingPageState extends State<GreetingPage> {
+  // ============================================================
+  // NAME
+  // ============================================================
+
   final TextEditingController _nameController = TextEditingController();
+
+  // ============================================================
+  // CAPTURE
+  // ============================================================
 
   final GlobalKey _captureKey = GlobalKey();
 
+  // ============================================================
+  // PAGE CONTROLLER
+  // ============================================================
+
   late final PageController _pageController;
+
+  // ============================================================
+  // STATE
+  // ============================================================
 
   int _selectedIndex = 0;
   bool _saving = false;
 
+  // ============================================================
+  // NAME COLOR
+  // ============================================================
+
+  String _nameColor = 'white';
+
+  // ============================================================
+  // VERCEL DRIVE PROXY
+  // ============================================================
+
   static const String _driveProxy =
       'https://azna-btabana-96-flutter-web.vercel.app/api/drive-image';
 
-  // تخزين الصور بعد تحميلها
+  // ============================================================
+  // LOADED IMAGES
+  // ============================================================
+
   final Map<int, Uint8List> _loadedImages = {};
 
   // ============================================================
@@ -47,6 +76,10 @@ class _GreetingPageState extends State<GreetingPage> {
     _loadAllDesigns();
   }
 
+  // ============================================================
+  // DISPOSE
+  // ============================================================
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -55,7 +88,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // تحميل كل التصاميم
+  // LOAD ALL DESIGNS
   // ============================================================
 
   Future<void> _loadAllDesigns() async {
@@ -74,7 +107,7 @@ class _GreetingPageState extends State<GreetingPage> {
       ),
       _loadDesign(
         3,
-        '1Dww_pkqEVIY-ZgzYgmRTtAU19L1mfv4b',
+        '1rcs6MtfBPafqSznST6-MSRqo7TEzX0VB',
       ),
       _loadDesign(
         4,
@@ -104,7 +137,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // تحميل تصميم واحد
+  // LOAD ONE DESIGN
   // ============================================================
 
   Future<void> _loadDesign(
@@ -155,7 +188,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم الأول
+  // DESIGN ONE
   // ============================================================
 
   Widget _designOne() {
@@ -163,7 +196,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم الثاني
+  // DESIGN TWO
   // ============================================================
 
   Widget _designTwo() {
@@ -171,7 +204,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم الثالث
+  // DESIGN THREE
   // ============================================================
 
   Widget _designThree() {
@@ -179,7 +212,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم الرابع
+  // DESIGN FOUR
   // ============================================================
 
   Widget _designFour() {
@@ -187,7 +220,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم الخامس
+  // DESIGN FIVE
   // ============================================================
 
   Widget _designFive() {
@@ -195,7 +228,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم السادس
+  // DESIGN SIX
   // ============================================================
 
   Widget _designSix() {
@@ -203,7 +236,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم السابع
+  // DESIGN SEVEN
   // ============================================================
 
   Widget _designSeven() {
@@ -211,7 +244,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم الثامن
+  // DESIGN EIGHT
   // ============================================================
 
   Widget _designEight() {
@@ -219,7 +252,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التصميم التاسع
+  // DESIGN NINE
   // ============================================================
 
   Widget _designNine() {
@@ -227,7 +260,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // عرض الصورة من الذاكرة
+  // IMAGE FROM MEMORY
   // ============================================================
 
   Widget _imageFromMemory(int index) {
@@ -262,7 +295,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // اختيار التصميم
+  // GET DESIGN
   // ============================================================
 
   Widget _getDesign(int index) {
@@ -300,7 +333,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // حالة الخطأ
+  // IMAGE ERROR
   // ============================================================
 
   Widget _imageError() {
@@ -331,7 +364,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // الاسم
+  // DISPLAY NAME
   // ============================================================
 
   String get _displayName {
@@ -345,7 +378,75 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // COVER FLOW
+  // SELECTED NAME COLOR
+  // ============================================================
+
+  Color get _selectedNameColor {
+    switch (_nameColor) {
+      case 'black':
+        return const Color(0xFF111111);
+
+      case 'green':
+        return const Color(0xFF006C35);
+
+      case 'gold':
+        return const Color(0xFFD4B56A);
+
+      case 'white':
+      default:
+        return Colors.white;
+    }
+  }
+
+  // ============================================================
+  // NAME SHADOW
+  // ============================================================
+
+  List<Shadow> get _nameShadows {
+    switch (_nameColor) {
+      case 'white':
+        return [
+          Shadow(
+            color: Colors.black.withOpacity(0.55),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ];
+
+      case 'black':
+        return [
+          Shadow(
+            color: Colors.white.withOpacity(0.55),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ];
+
+      case 'green':
+        return [
+          Shadow(
+            color: Colors.white.withOpacity(0.45),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ];
+
+      case 'gold':
+        return [
+          Shadow(
+            color: Colors.black.withOpacity(0.55),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ];
+
+      default:
+        return [];
+    }
+  }
+
+  // ============================================================
+  // COVER FLOW CARD
   // ============================================================
 
   Widget _buildDesignCard({
@@ -356,7 +457,10 @@ class _GreetingPageState extends State<GreetingPage> {
 
     final distance = difference.abs();
 
-    final scale = (1 - distance * 0.22).clamp(0.72, 1.0);
+    final scale = (1 - distance * 0.22).clamp(
+      0.72,
+      1.0,
+    );
 
     final rotation = difference.clamp(-1.0, 1.0) * 0.10;
 
@@ -371,37 +475,76 @@ class _GreetingPageState extends State<GreetingPage> {
           angle: rotation,
           child: Transform.scale(
             scale: scale,
-            child: AnimatedContainer(
-              duration: const Duration(
-                milliseconds: 150,
-              ),
-              width: 230,
-              height: 405,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                  24,
+            child: RepaintBoundary(
+              key: isSelected ? _captureKey : null,
+              child: AnimatedContainer(
+                duration: const Duration(
+                  milliseconds: 150,
                 ),
-                border: Border.all(
-                  color: isSelected ? AppColors.gold : Colors.transparent,
-                  width: isSelected ? 2.5 : 0,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.gold.withOpacity(
-                            0.25,
+                width: 230,
+                height: 405,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isSelected ? AppColors.gold : Colors.transparent,
+                    width: isSelected ? 2.5 : 0,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.gold.withOpacity(
+                              0.25,
+                            ),
+                            blurRadius: 25,
+                            spreadRadius: 2,
                           ),
-                          blurRadius: 25,
-                          spreadRadius: 2,
-                        ),
-                      ]
-                    : null,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  21,
+                        ]
+                      : null,
                 ),
-                child: _getDesign(index),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(21),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // ==================================================
+                      // DESIGN IMAGE
+                      // ==================================================
+
+                      _getDesign(index),
+
+                      // ==================================================
+                      // NAME DIRECTLY ON IMAGE
+                      // ==================================================
+
+                      Align(
+                        alignment: const Alignment(
+                          0,
+                          0.62,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              _displayName,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'SaudiWeb',
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: _selectedNameColor,
+                                shadows: _nameShadows,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -411,7 +554,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // التقاط الصورة
+  // CAPTURE SELECTED DESIGN
   // ============================================================
 
   Future<Uint8List?> _capture() async {
@@ -434,7 +577,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // الحفظ
+  // SAVE
   // ============================================================
 
   Future<void> _save() async {
@@ -467,9 +610,7 @@ class _GreetingPageState extends State<GreetingPage> {
         'image/png',
       );
 
-      final url = html.Url.createObjectUrlFromBlob(
-        blob,
-      );
+      final url = html.Url.createObjectUrlFromBlob(blob);
 
       final anchor = html.AnchorElement(
         href: url,
@@ -486,9 +627,7 @@ class _GreetingPageState extends State<GreetingPage> {
 
       anchor.remove();
 
-      html.Url.revokeObjectUrl(
-        url,
-      );
+      html.Url.revokeObjectUrl(url);
 
       _showMessage(
         'تم حفظ التهنئة بنجاح 🇸🇦',
@@ -511,12 +650,10 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
-  // الرسائل
+  // MESSAGE
   // ============================================================
 
-  void _showMessage(
-    String message,
-  ) {
+  void _showMessage(String message) {
     if (!mounted) {
       return;
     }
@@ -534,13 +671,50 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   // ============================================================
+  // COLOR CHIP
+  // ============================================================
+
+  Widget _colorChip({
+    required String value,
+    required String label,
+    required Color color,
+    required Color selectedColor,
+  }) {
+    final selected = _nameColor == value;
+
+    return ChoiceChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'SaudiWeb',
+          fontWeight: FontWeight.w700,
+          color: selected ? AppColors.deep : AppColors.white,
+        ),
+      ),
+      selected: selected,
+      onSelected: (_) {
+        setState(() {
+          _nameColor = value;
+        });
+      },
+      avatar: CircleAvatar(
+        radius: 8,
+        backgroundColor: color,
+      ),
+      selectedColor: selectedColor,
+      backgroundColor: AppColors.deep2,
+      side: BorderSide(
+        color: selected ? selectedColor : AppColors.muted.withOpacity(0.25),
+      ),
+    );
+  }
+
+  // ============================================================
   // BUILD
   // ============================================================
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -567,287 +741,304 @@ class _GreetingPageState extends State<GreetingPage> {
         // BODY
         // ========================================================
 
-        body: ListView(
-          padding: const EdgeInsets.only(
-            top: 18,
-            bottom: 30,
-          ),
-          children: [
-            // ====================================================
-            // العنوان
-            // ====================================================
-
-            const Text(
-              'اختر تصميم تهنئتك',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'SaudiWeb',
-                color: AppColors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-              ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.only(
+              top: 18,
+              bottom: 30,
             ),
+            children: [
+              // ==================================================
+              // TITLE
+              // ==================================================
 
-            const SizedBox(
-              height: 6,
-            ),
-
-            const Text(
-              'اسحب يمين ويسار واختر التصميم اللي يعجبك',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'SaudiWeb',
-                color: AppColors.muted,
-                fontSize: 14,
-              ),
-            ),
-
-            const SizedBox(
-              height: 20,
-            ),
-
-            // ====================================================
-            // COVER FLOW
-            // ====================================================
-
-            SizedBox(
-              height: 500,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: 9,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index) {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                },
-                itemBuilder: (
-                  context,
-                  index,
-                ) {
-                  return AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (
-                      context,
-                      child,
-                    ) {
-                      double page = _selectedIndex.toDouble();
-
-                      if (_pageController.hasClients) {
-                        page =
-                            _pageController.page ?? _selectedIndex.toDouble();
-                      }
-
-                      return _buildDesignCard(
-                        index: index,
-                        page: page,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-
-            // ====================================================
-            // رقم التصميم
-            // ====================================================
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.swipe_rounded,
-                  color: AppColors.gold,
-                  size: 18,
-                ),
-                const SizedBox(
-                  width: 7,
-                ),
-                Text(
-                  '${_selectedIndex + 1} من 9',
-                  style: const TextStyle(
-                    fontFamily: 'SaudiWeb',
-                    color: AppColors.muted,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(
-              height: 24,
-            ),
-
-            // ====================================================
-            // الاسم
-            // ====================================================
-
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-              ),
-              child: TextField(
-                controller: _nameController,
-                onChanged: (_) {
-                  setState(() {});
-                },
-                textAlign: TextAlign.right,
-                style: const TextStyle(
+              const Text(
+                'اختر تصميم تهنئتك',
+                textAlign: TextAlign.center,
+                style: TextStyle(
                   fontFamily: 'SaudiWeb',
                   color: AppColors.white,
-                  fontSize: 18,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'اكتب اسمك',
-                  hintText: 'مثال: تهاني',
-                  prefixIcon: const Icon(
-                    Icons.person_outline,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.deep2,
-                  labelStyle: const TextStyle(
-                    fontFamily: 'SaudiWeb',
-                    color: AppColors.muted,
-                  ),
-                  hintStyle: const TextStyle(
-                    fontFamily: 'SaudiWeb',
-                    color: AppColors.muted,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      18,
-                    ),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      18,
-                    ),
-                    borderSide: const BorderSide(
-                      color: AppColors.gold,
-                      width: 1.2,
-                    ),
-                  ),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-            ),
 
-            const SizedBox(
-              height: 24,
-            ),
+              const SizedBox(height: 6),
 
-            // ====================================================
-            // المعاينة النهائية
-            // ====================================================
-
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 40,
-              ),
-              child: RepaintBoundary(
-                key: _captureKey,
-                child: AspectRatio(
-                  aspectRatio: 9 / 16,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // التصميم
-                      _getDesign(
-                        _selectedIndex,
-                      ),
-
-                      // الاسم
-                      Align(
-                        alignment: const Alignment(
-                          0,
-                          0.62,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _displayName,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontFamily: 'SaudiWeb',
-                                fontSize: 32,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.white,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 8,
-                                    offset: Offset(
-                                      0,
-                                      2,
-                                    ),
-                                    color: Colors.black54,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              const Text(
+                'اسحب يمين ويسار واختر التصميم اللي يعجبك',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'SaudiWeb',
+                  color: AppColors.muted,
+                  fontSize: 14,
                 ),
               ),
-            ),
 
-            const SizedBox(
-              height: 24,
-            ),
+              const SizedBox(height: 20),
 
-            // ====================================================
-            // زر الحفظ
-            // ====================================================
+              // ==================================================
+              // COVER FLOW
+              // ==================================================
 
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
+              SizedBox(
+                height: 500,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: 9,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  itemBuilder: (
+                    context,
+                    index,
+                  ) {
+                    return AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (
+                        context,
+                        child,
+                      ) {
+                        double page = _selectedIndex.toDouble();
+
+                        if (_pageController.hasClients) {
+                          page =
+                              _pageController.page ?? _selectedIndex.toDouble();
+                        }
+
+                        return _buildDesignCard(
+                          index: index,
+                          page: page,
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-              child: FilledButton.icon(
-                onPressed: _saving ? null : _save,
-                icon: _saving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.download_rounded,
-                      ),
-                label: Text(
-                  _saving ? 'جاري تجهيز التهنئة...' : 'حفظ التهنئة',
+
+              // ==================================================
+              // DESIGN NUMBER
+              // ==================================================
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.swipe_rounded,
+                    color: AppColors.gold,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    '${_selectedIndex + 1} من 9',
+                    style: const TextStyle(
+                      fontFamily: 'SaudiWeb',
+                      color: AppColors.muted,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // ==================================================
+              // NAME FIELD
+              // ==================================================
+
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                ),
+                child: TextField(
+                  controller: _nameController,
+                  onChanged: (_) {
+                    setState(() {});
+                  },
+                  textAlign: TextAlign.right,
                   style: const TextStyle(
                     fontFamily: 'SaudiWeb',
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                    fontSize: 18,
                   ),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.emerald,
-                  foregroundColor: AppColors.white,
-                  minimumSize: const Size.fromHeight(
-                    56,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      18,
+                  decoration: InputDecoration(
+                    labelText: 'اكتب اسمك',
+                    hintText: 'مثال:اخوكم/اختكم، ثم الاسم',
+                    prefixIcon: const Icon(
+                      Icons.person_outline,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.deep2,
+                    labelStyle: const TextStyle(
+                      fontFamily: 'SaudiWeb',
+                      color: AppColors.muted,
+                    ),
+                    hintStyle: const TextStyle(
+                      fontFamily: 'SaudiWeb',
+                      color: AppColors.muted,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: const BorderSide(
+                        color: AppColors.gold,
+                        width: 1.2,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 14),
+
+              // ==================================================
+              // NAME COLOR
+              // ==================================================
+
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'لون الاسم',
+                      style: TextStyle(
+                        fontFamily: 'SaudiWeb',
+                        color: AppColors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ==================================================
+                    // FOUR COLORS
+                    // ==================================================
+
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        // ----------------------------------------------
+                        // WHITE
+                        // ----------------------------------------------
+
+                        _colorChip(
+                          value: 'white',
+                          label: 'أبيض',
+                          color: Colors.white,
+                          selectedColor: const Color(0xFFD4B56A),
+                        ),
+
+                        // ----------------------------------------------
+                        // BLACK
+                        // ----------------------------------------------
+
+                        _colorChip(
+                          value: 'black',
+                          label: 'أسود',
+                          color: const Color(0xFF111111),
+                          selectedColor: const Color(0xFF006C35),
+                        ),
+
+                        // ----------------------------------------------
+                        // GREEN
+                        // ----------------------------------------------
+
+                        _colorChip(
+                          value: 'green',
+                          label: 'أخضر',
+                          color: const Color(0xFF006C35),
+                          selectedColor: const Color(0xFF006C35),
+                        ),
+
+                        // ----------------------------------------------
+                        // GOLD
+                        // ----------------------------------------------
+
+                        _colorChip(
+                          value: 'gold',
+                          label: 'ذهبي',
+                          color: const Color(0xFFD4B56A),
+                          selectedColor: const Color(0xFFD4B56A),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ==================================================
+              // SAVE BUTTON
+              // ==================================================
+
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                ),
+                child: FilledButton.icon(
+                  onPressed: _saving ? null : _save,
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.download_rounded,
+                        ),
+                  label: Text(
+                    _saving ? 'جاري تجهيز التهنئة...' : 'حفظ التهنئة',
+                    style: const TextStyle(
+                      fontFamily: 'SaudiWeb',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.emerald,
+                    foregroundColor: AppColors.white,
+                    minimumSize: const Size.fromHeight(56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              // ==================================================
+              // FOOTER
+              // ==================================================
+
+              const Text(
+                'عزنا بطبعنا 🇸🇦',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'SaudiWeb',
+                  color: AppColors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
